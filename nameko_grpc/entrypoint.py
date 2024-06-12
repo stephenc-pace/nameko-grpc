@@ -78,13 +78,14 @@ class GrpcServer(SharedExtension):
         host = config.get("GRPC_BIND_HOST", "0.0.0.0")
         port = config.get("GRPC_BIND_PORT", 50051)
         ssl = SslConfig(config.get("GRPC_SSL"))
+        max_concurrent_streams = config.get("MAX_CONCURRENT_STREAMS", 100)
 
         def spawn_thread(target, args=(), kwargs=None, name=None):
             self.container.spawn_managed_thread(
                 lambda: target(*args, **kwargs or {}), identifier=name
             )
 
-        self.channel = ServerChannel(host, port, ssl, spawn_thread, self.handle_request)
+        self.channel = ServerChannel(host, port, ssl, spawn_thread, self.handle_request, max_concurrent_streams)
 
     def start(self):
         self.channel.start()
